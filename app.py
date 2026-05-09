@@ -9,18 +9,17 @@ from langchain_classic.chains import create_retrieval_chain
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")
-
 @st.cache_resource
 def configurar_asistente():
-    # 1. Cargar PDFs de la carpeta documentos
+    # 1. Cargar PDFs
     loader = PyPDFDirectoryLoader("documentos/")
     docs = loader.load()
     
-    # 2. Dividir texto en fragmentos
+    # 2. Dividir texto
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = splitter.split_documents(docs)
     
-    # 3. Configurar Embeddings (Forzando versión v1 para evitar 404)
+    # 3. Configurar Embeddings
     embeddings = GoogleGenerativeAIEmbeddings(
         model="models/embedding-001",
         google_api_key=st.secrets["GEMINI_API_KEY"],
@@ -30,17 +29,18 @@ def configurar_asistente():
     # 4. Crear base de datos vectorial
     vectorstore = FAISS.from_documents(chunks, embeddings)
     
-    # 5. Configurar Modelo de Chat (Forzando versión v1)
-llm = ChatGoogleGenerativeAI(
+    # 5. Modelo de Chat
+    llm = ChatGoogleGenerativeAI(
         model="models/gemini-1.5-flash",
         temperature=0.2,
         google_api_key=st.secrets["GEMINI_API_KEY"],
         client_options={"api_version": "v1"}
     )
-    # 6. Definir el Prompt Académico de la UCV
+    
+    # 6. Definir el Prompt
     system_prompt = (
         "Eres un profesor del diplomado de educación terapéutica en diabetes de la UCV. "
-        "Tu propósito es guiar sobre conocimiento y autoeficacia usando Bandura y Carga Cognitiva. "
+        "Guía sobre conocimiento y autoeficacia usando Bandura y Carga Cognitiva. "
         "Basa tus respuestas EXCLUSIVAMENTE en el contexto: {context}"
     )
     
@@ -49,7 +49,7 @@ llm = ChatGoogleGenerativeAI(
         ("human", "{input}"),
     ])
     
-    # 7. Crear la cadena de recuperación
+    # 7. Crear la cadena
     combine_docs_chain = create_stuff_documents_chain(llm, prompt)
     return create_retrieval_chain(vectorstore.as_retriever(), combine_docs_chain)
 

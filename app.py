@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -21,7 +21,10 @@ def preparar_asistente():
     chunks = splitter.split_documents(docs)
     
     # 3. Crear embeddings y base de datos vectorial
-    embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["OPENAI_API_KEY"])
+   embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001",
+        google_api_key=st.secrets["GEMINI_API_KEY"]
+    )
     vectorstore = FAISS.from_documents(chunks, embeddings)
     
     # 4. DEFINICIÓN DEL PROMPT DE EXPERTO (Tu instrucción académica)
@@ -49,7 +52,11 @@ def preparar_asistente():
     )
 
     # 5. Configurar la cadena de respuesta
-    llm = ChatOpenAI(model_name="gpt-4", temperature=0.2, openai_api_key=st.secrets["OPENAI_API_KEY"])
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-1.5-flash", 
+        temperature=0.2,
+        google_api_key=st.secrets["GEMINI_API_KEY"]
+    )
     
     return RetrievalQA.from_chain_type(
         llm=llm,
@@ -65,7 +72,7 @@ asistente_ucv = preparar_asistente()
 
 with st.sidebar:
     st.image("https://wikimedia.org", width=100)
-    st.title("Diplomado UCV")
+    st.title("Educación en Diabetes")
     st.markdown("**Educación Terapéutica en Diabetes**")
     st.divider()
     st.write("Este asistente utiliza el marco teórico de Bandura y Carga Cognitiva.")

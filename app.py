@@ -31,12 +31,7 @@ def configurar_asistente():
     vectorstore = FAISS.from_documents(chunks, embeddings)
     
     # 5. Configurar Modelo de Chat (Forzando versión v1)
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash-8b", # Esta versión es ultra-estable para RAG
-        temperature=0.2,
-        google_api_key=st.secrets["GEMINI_API_KEY"],
-        client_options={"api_version": "v1"}
-    )
+     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.2)
     
     # 6. Definir el Prompt Académico de la UCV
     system_prompt = (

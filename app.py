@@ -21,11 +21,10 @@ def configurar_asistente():
     chunks = splitter.split_documents(docs)
     
     # 3. Configurar Embeddings (Forzando v1 para evitar 404)
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="text-embedding-004",
-        google_api_key=st.secrets["GEMINI_API_KEY"],
-        client_options={"api_version": "v1"}
-    )
+    embeddings_model = GoogleGenerativeAIEmbeddings(
+            model="gemini-embedding-001", 
+            google_api_key=API_KEY
+        )
     
     # 4. Crear base de datos vectorial
     vectorstore = FAISS.from_documents(chunks, embeddings)

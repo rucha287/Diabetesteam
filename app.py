@@ -4,8 +4,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
+# Estas son las nuevas rutas para evitar el ModuleNotFoundError:
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
+from langchain.chains.retrieval import create_retrieval_chain
 
 # --- CONFIGURACIÓN ---
 st.set_page_config(page_title="Asistente UCV Diabetes", page_icon="🩺")

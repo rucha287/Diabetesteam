@@ -23,7 +23,7 @@ def configurar_asistente():
     # 3. Configurar Embeddings (Forzando v1 para evitar 404)
     embeddings_model = GoogleGenerativeAIEmbeddings(
             model="gemini-embedding-001", 
-            google_api_key=API_KEY
+             google_api_key=st.secrets["GEMINI_API_KEY"]
         )
     
     # 4. Crear base de datos vectorial

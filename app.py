@@ -3,9 +3,8 @@ from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
-from langchain_core.prompts import ChatPromptTemplate
-# Estas son las nuevas rutas para evitar el ModuleNotFoundError:
-from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
 
 # --- CONFIGURACIÓN ---
 st.set_page_config(page_title="Asistente UCV Diabetes", page_icon="🩺")

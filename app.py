@@ -23,7 +23,7 @@ def configurar_asistente():
     
     # 3. Embeddings y Vectorstore
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="text-embedding-004",  # Cambiado de embedding-001 a text-embedding-004
+        model="gemini-embedding-004",  # Cambiado de embedding-001 a text-embedding-004
         google_api_key=st.secrets["GEMINI_API_KEY"]
     )
     vectorstore = FAISS.from_documents(chunks, embeddings)

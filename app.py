@@ -3,9 +3,10 @@ from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
+# Importaciones desde el paquete de compatibilidad classic
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_classic.chains import create_retrieval_chain
 
 # --- CONFIGURACIÓN ---
 st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")

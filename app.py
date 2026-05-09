@@ -32,7 +32,7 @@ def configurar_asistente():
     
     # 5. Configurar Modelo de Chat (Forzando versión v1)
     llm = ChatGoogleGenerativeAI(
-        model="models/gemini-1.5-flash",
+        model="gemini-1.5-flash-latest", # Usamos el alias 'latest' que siempre apunta a la v1
         temperature=0.2,
         google_api_key=st.secrets["GEMINI_API_KEY"],
         client_options={"api_version": "v1"}

@@ -22,7 +22,7 @@ def configurar_asistente():
     
     # 3. Configurar Embeddings (Forzando v1 para evitar 404)
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="gemini-embedding-004",
+        model="models/text-embedding-004",
         google_api_key=st.secrets["GEMINI_API_KEY"],
         client_options={"api_version": "v1"}
     )

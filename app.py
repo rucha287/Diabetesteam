@@ -5,7 +5,6 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 # Estas son las nuevas rutas para evitar el ModuleNotFoundError:
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
 
 # --- CONFIGURACIÓN ---

@@ -9,7 +9,7 @@ from langchain.prompts import PromptTemplate
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Asistente Diplomado Diabetes UCV", page_icon="🩺")
 
-# --- LÓGICA DE IA Y PROMPT PERSONALIZADO ---
+# --- LÓGICA DE IA CON GEMINI ---
 @st.cache_resource
 def preparar_asistente():
     # 1. Cargar PDFs desde la carpeta física en GitHub
@@ -20,14 +20,16 @@ def preparar_asistente():
     splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=200)
     chunks = splitter.split_documents(docs)
     
-    # 3. Crear embeddings y base de datos vectorial
-   embeddings = GoogleGenerativeAIEmbeddings(
+    # 3. Crear embeddings de Google
+    embeddings = GoogleGenerativeAIEmbeddings(
         model="models/embedding-001",
         google_api_key=st.secrets["GEMINI_API_KEY"]
     )
+    
+    # 4. Crear base de datos vectorial
     vectorstore = FAISS.from_documents(chunks, embeddings)
     
-    # 4. DEFINICIÓN DEL PROMPT DE EXPERTO (Tu instrucción académica)
+    # 5. DEFINICIÓN DEL PROMPT DE EXPERTO UCV
     template = """Eres un profesor del diplomado de educación terapéutica en diabetes de la Universidad Central de Venezuela y un experto en diseño instruccional para pacientes. Tu propósito es guiar a los educadores en diabetes sobre la mejor manera de lograr que los pacientes adquieran conocimiento y autoeficacia en el manejo de su condición. 
 
     Para ello, integrarás y aplicarás los principios de la teoría de la carga cognitiva, la teoría de la autoeficacia de Bandura y las herramientas de las precauciones universales de alfabetización en salud, tal como se definen en tus documentos de referencia.
@@ -51,7 +53,7 @@ def preparar_asistente():
         template=template, input_variables=["context", "question"]
     )
 
-    # 5. Configurar la cadena de respuesta
+    # 6. Configurar el modelo Gemini 1.5
     llm = ChatGoogleGenerativeAI(
         model="gemini-1.5-flash", 
         temperature=0.2,
@@ -66,16 +68,19 @@ def preparar_asistente():
     )
 
 # Inicialización
-asistente_ucv = preparar_asistente()
+try:
+    asistente_ucv = preparar_asistente()
+except Exception as e:
+    st.error(f"Error al cargar el asistente: {e}")
+    st.stop()
 
 # --- INTERFAZ DE USUARIO (Frontend Streamlit) ---
 
 with st.sidebar:
     st.image("https://wikimedia.org", width=100)
-    st.title("Educación en Diabetes")
+    st.title("Diplomado UCV")
     st.markdown("**Educación Terapéutica en Diabetes**")
     st.divider()
-    st.write("Este asistente utiliza el marco teórico de Bandura y Carga Cognitiva.")
     if st.button("Nueva sesión de tutoría"):
         st.session_state.messages = []
         st.rerun()
@@ -99,7 +104,6 @@ if prompt := st.chat_input("Ej: ¿Cómo enseñar el uso del glucómetro usando B
 
     with st.chat_message("assistant"):
         with st.spinner("Analizando bases teóricas y documentos..."):
-            # Aquí es donde ocurre la magia de tu prompt
             respuesta = asistente_ucv.invoke(prompt)
             texto_respuesta = respuesta["result"]
             

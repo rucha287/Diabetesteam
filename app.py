@@ -1,84 +1,86 @@
 import streamlit as st
-import time
+import google.generativeai as genai
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_classic.chains import create_retrieval_chain
 
+# --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")
 
+# Configuración directa de Google (Evita el error 404 de LangChain)
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
 @st.cache_resource
-def configurar_asistente():
-    # 1. Cargar PDFs
+def preparar_conocimiento():
+    # 1. Cargar PDFs de la carpeta documentos
     loader = PyPDFDirectoryLoader("documentos/")
     docs = loader.load()
     
-    # 2. Fragmentos grandes para minimizar peticiones
-    splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=400)
+    # 2. Dividir texto
+    splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
     chunks = splitter.split_documents(docs)
     
-    # 3. Configurar Embeddings (Ruta oficial simplificada)
+    # 3. Embeddings (Usando el que ya te funcionó)
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="gemini-embedding-001",
+        model="models/gemini-embedding-001",
         google_api_key=st.secrets["GEMINI_API_KEY"]
     )
     
-    # 4. Creación por bloques con pausa para evitar el error 429 (Cuota)
-    vectorstore = None
-    batch_size = 3 
-    
-    for i in range(0, len(chunks), batch_size):
-        batch = chunks[i : i + batch_size]
-        if vectorstore is None:
-            vectorstore = FAISS.from_documents(batch, embeddings)
-        else:
-            vectorstore.add_documents(batch)
-        time.sleep(2) # Pausa de seguridad
-    
-    # 5. Configurar Modelo de Chat (Ruta oficial simplificada)
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash-latest", 
-        temperature=0.2,
-        google_api_key=st.secrets["GEMINI_API_KEY"]
-    )
-    
-    # 6. Prompt Académico UCV
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "Eres profesor del diplomado de diabetes de la UCV. Responde basándote en el contexto: {context}"),
-        ("human", "{input}"),
-    ])
-    
-    combine_docs_chain = create_stuff_documents_chain(llm, prompt)
-    return create_retrieval_chain(vectorstore.as_retriever(), combine_docs_chain)
+    # 4. Crear base de datos de búsqueda
+    vectorstore = FAISS.from_documents(chunks, embeddings)
+    return vectorstore
 
-# Ejecución
+# Inicializar sistema
 try:
-    asistente_ucv = configurar_asistente()
+    base_datos = preparar_conocimiento()
 except Exception as e:
-    st.error(f"Error técnico: {e}")
-    if st.button("Limpiar caché y reintentar"):
-        st.cache_resource.clear()
-        st.rerun()
+    st.error(f"Error al procesar PDFs: {e}")
     st.stop()
 
-st.title("🩺 Tutor Diabetes UCV")
+# --- INTERFAZ DE USUARIO ---
+st.title("🩺 Tutor Inteligente de Diabetes (UCV)")
+st.caption("Marco Teórico: Bandura, Carga Cognitiva y Alfabetización en Salud")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Mostrar historial
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
-if prompt_usuario := st.chat_input("Escribe tu pregunta académica..."):
+# Entrada del usuario
+if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
     st.session_state.messages.append({"role": "user", "content": prompt_usuario})
     with st.chat_message("user"):
         st.markdown(prompt_usuario)
     
+    # Respuesta del Asistente
     with st.chat_message("assistant"):
-        response = asistente_ucv.invoke({"input": prompt_usuario})
-        st.markdown(response["answer"])
-        st.session_state.messages.append({"role": "assistant", "content": response["answer"]})
+        with st.spinner("Consultando documentos de la UCV..."):
+            # A. Buscar información relevante en tus PDFs
+            busqueda = base_datos.similarity_search(prompt_usuario, k=3)
+            contexto_pdfs = "\n\n".join([doc.page_content for doc in busqueda])
+            
+            # B. Crear el mensaje para Gemini con tu Prompt de experto
+            instruccion_maestra = f"""
+            Eres un profesor del diplomado de educación terapéutica en diabetes de la Universidad Central de Venezuela.
+            Tu propósito es guiar a los educadores usando la teoría de la carga cognitiva, Bandura y alfabetización en salud.
+            
+            Basa tu respuesta EXCLUSIVAMENTE en este contexto extraído de tus documentos:
+            {contexto_pdfs}
+            
+            Si la información no está en el contexto, di que no puedes responder. No inventes.
+            """
+            
+            # C. Llamada DIRECTA a Google Gemini (Saltando el error 404)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            try:
+                response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
+                respuesta_texto = response.text
+                
+                st.markdown(respuesta_texto)
+                st.session_state.messages.append({"role": "assistant", "content": respuesta_texto})
+            except Exception as e:
+                st.error(f"Error en el motor de respuesta: {e}")

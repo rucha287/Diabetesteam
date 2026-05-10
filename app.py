@@ -1,10 +1,5 @@
 import streamlit as st
 import google.generativeai as genai
-genai.configure(api_key="TU_API_KEY")
-
-for m in genai.list_models():
-    if 'generateContent' in m.supported_generation_methods:
-        print(m.name)
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -15,8 +10,7 @@ st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")
 
 # Configuración directa de Google (Evita el error 404 de LangChain)
 import google.ai.generativelanguage as gapic
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"], transport="rest")
 @st.cache_resource
 def preparar_conocimiento():
     import time
@@ -86,7 +80,7 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
             
             try:
                 # C. Llamada con el modelo Pro (Nombre técnico absoluto)
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                model = genai.GenerativeModel('gemini-1.5-pro')
                 response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 
                 respuesta_texto = response.text

@@ -16,7 +16,7 @@ def configurar_asistente():
     docs = loader.load()
     
     # 2. Dividir texto
-    splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=400)
     chunks = splitter.split_documents(docs)
     
     # 3. Definir Embeddings (¡Aquí está la línea que faltaba!)

@@ -75,7 +75,7 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
             """
             
             # C. Llamada DIRECTA a Google Gemini (Saltando el error 404)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
             try:
                 response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 respuesta_texto = response.text

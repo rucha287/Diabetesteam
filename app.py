@@ -72,14 +72,9 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
                 Contexto: {contexto_pdfs}
                 """
             
-            # C. Llamada directa
-                model = genai.GenerativeModel(
-    model = genai.GenerativeModel('gemini-pro'),
-    generation_config={"temperature": 0.2}
-)
-                response = model.generate_content(
-    f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}"
-)
+           # C. Llamada directa
+                model = genai.GenerativeModel('models/gemini-1.5-flash')
+                response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 
                 respuesta_texto = response.text
                 st.markdown(respuesta_texto)
@@ -87,3 +82,12 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
                 
             except Exception as e:
                 st.error(f"Error en el motor de respuesta: {e}")
+
+model = genai.GenerativeModel(
+    model_name='gemini-1.5-flash',
+    generation_config={"temperature": 0.2}
+)
+
+response = model.generate_content(
+    f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}"
+)

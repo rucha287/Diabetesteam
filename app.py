@@ -22,7 +22,7 @@ def configurar_asistente():
     
     # 3. Configurar Embeddings (Ruta oficial simplificada)
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="embedding-001",
+        model="gemini-embedding-001",
         google_api_key=st.secrets["GEMINI_API_KEY"]
     )
     

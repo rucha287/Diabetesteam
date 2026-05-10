@@ -61,19 +61,24 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
     with st.chat_message("assistant"):
         with st.spinner("Consultando documentos de la UCV..."):
             try:
-                # A. Buscar información relevante en tus PDFs
+                # 1. Buscar información relevante en tus PDFs
                 busqueda = base_datos.similarity_search(prompt_usuario, k=3)
                 contexto_pdfs = "\n\n".join([doc.page_content for doc in busqueda])
-            
-            # B. Crear el mensaje para Gemini
+                
+                # 2. Definir la instrucción dentro del bloque try
                 instruccion_maestra = f"""
-                Eres un profesor del diplomado de educación terapéutica en diabetes de la UCV.
+                Eres un profesor del diplomado de educación terapéutica en diabetes de la Universidad Central de Venezuela.
                 Responde usando la teoría de la carga cognitiva, Bandura y alfabetización en salud.
-                Contexto: {contexto_pdfs}
+                
+                Basa tu respuesta EXCLUSIVAMENTE en este contexto extraído de tus documentos:
+                {contexto_pdfs}
+                
+                Si la información no está en el contexto, di que no puedes responder. No inventes.
                 """
-            
-           # C. Llamada directa
-                model = genai.GenerativeModel('models/gemini-1.5-flash')
+                
+                # 3. Llamada al modelo corregida (model_name)
+                # Usamos gemini-pro que es el más estable para evitar errores 404
+                model = genai.GenerativeModel(model_name='gemini-pro')
                 response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 
                 respuesta_texto = response.text
@@ -82,12 +87,3 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
                 
             except Exception as e:
                 st.error(f"Error en el motor de respuesta: {e}")
-
-model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash',
-    generation_config={"temperature": 0.2}
-)
-
-response = model.generate_content(
-    f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}"
-)

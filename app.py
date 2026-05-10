@@ -40,10 +40,9 @@ def configurar_asistente():
     
     # 5. Configurar Modelo de Chat (Ruta oficial simplificada)
     llm = ChatGoogleGenerativeAI(
-        model="models/gemini-1.5-flash", 
+        model="gemini-1.5-flash-latest", 
         temperature=0.2,
-        google_api_key=st.secrets["GEMINI_API_KEY"],
-        api_version="v1" # Cambiamos client_options por esta forma directa
+        google_api_key=st.secrets["GEMINI_API_KEY"]
     )
     
     # 6. Prompt Académico UCV

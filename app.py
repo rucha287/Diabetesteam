@@ -1,5 +1,10 @@
 import streamlit as st
 import google.generativeai as genai
+genai.configure(api_key="TU_API_KEY")
+
+for m in genai.list_models():
+    if 'generateContent' in m.supported_generation_methods:
+        print(m.name)
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -12,7 +17,6 @@ st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")
 import google.ai.generativelanguage as gapic
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-@st.cache_resource
 @st.cache_resource
 def preparar_conocimiento():
     import time

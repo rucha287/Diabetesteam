@@ -80,7 +80,7 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
             
             try:
                 # C. Llamada con el modelo Pro (Nombre técnico absoluto)
-                model = genai.GenerativeModel('gemini-1.5-pro')
+                model = genai.GenerativeModel('gemini-1.0-pro')
                 response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 
                 respuesta_texto = response.text

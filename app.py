@@ -60,25 +60,16 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
     # Respuesta del Asistente
     with st.chat_message("assistant"):
         with st.spinner("Consultando documentos de la UCV..."):
+            # A. Búsqueda de contexto
+            busqueda = base_datos.similarity_search(prompt_usuario, k=3)
+            contexto_pdfs = "\n\n".join([doc.page_content for doc in busqueda])
+            
+            # B. Definición del Prompt (Fuera del try para evitar NameError)
+            instruccion_maestra = f"Eres profesor de la UCV. Contexto: {contexto_pdfs}"
+            
             try:
-                # 1. Buscar información relevante en tus PDFs
-                busqueda = base_datos.similarity_search(prompt_usuario, k=3)
-                contexto_pdfs = "\n\n".join([doc.page_content for doc in busqueda])
-                
-                # 2. Definir la instrucción dentro del bloque try
-                instruccion_maestra = f"""
-                Eres un profesor del diplomado de educación terapéutica en diabetes de la Universidad Central de Venezuela.
-                Responde usando la teoría de la carga cognitiva, Bandura y alfabetización en salud.
-                
-                Basa tu respuesta EXCLUSIVAMENTE en este contexto extraído de tus documentos:
-                {contexto_pdfs}
-                
-                Si la información no está en el contexto, di que no puedes responder. No inventes.
-                """
-                
-                # 3. Llamada al modelo corregida (model_name)
-                # Usamos gemini-pro que es el más estable para evitar errores 404
-                model = genai.GenerativeModel(model_name='models/gemini-1.0-pro')
+                # C. Llamada con el modelo Pro (Nombre técnico absoluto)
+                model = genai.GenerativeModel(model_name='gemini-1.0-pro')
                 response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 
                 respuesta_texto = response.text

@@ -11,12 +11,6 @@ st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")
 # Configuración directa de Google (Evita el error 404 de LangChain)
 import google.ai.generativelanguage as gapic
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"], transport="rest")
-# --- CÓDIGO TEMPORAL PARA VER MODELOS ---
-with st.expander("Ver modelos disponibles"):
-    for m in genai.list_models():
-        if 'generateContent' in m.supported_generation_methods:
-            st.write(f"- {m.name}")
-# --- FIN CÓDIGO TEMPORAL ---
 @st.cache_resource
 def preparar_conocimiento():
     import time

@@ -78,7 +78,7 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
                 
                 # 3. Llamada al modelo corregida (model_name)
                 # Usamos gemini-pro que es el más estable para evitar errores 404
-                model = genai.GenerativeModel(model_name='gemini-pro')
+                model = genai.GenerativeModel(model_name='models/gemini-1.0-pro')
                 response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 
                 respuesta_texto = response.text

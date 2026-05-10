@@ -13,23 +13,36 @@ import google.ai.generativelanguage as gapic
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 @st.cache_resource
+@st.cache_resource
 def preparar_conocimiento():
-    # 1. Cargar PDFs de la carpeta documentos
+    import time
+    # 1. Cargar PDFs
     loader = PyPDFDirectoryLoader("documentos/")
     docs = loader.load()
     
-    # 2. Dividir texto
-    splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=500)
+    # 2. Chunks MUY grandes para reducir el número de peticiones
+    splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=500)
     chunks = splitter.split_documents(docs)
     
-    # 3. Embeddings (Usando el que ya te funcionó)
+    # 3. Embeddings
     embeddings = GoogleGenerativeAIEmbeddings(
         model="models/gemini-embedding-001",
         google_api_key=st.secrets["GEMINI_API_KEY"]
     )
     
-    # 4. Crear base de datos de búsqueda
-    vectorstore = FAISS.from_documents(chunks, embeddings)
+    # 4. Procesamiento por lotes con PAUSA (Batch processing)
+    # Esto evita el error RESOURCE_EXHAUSTED
+    vectorstore = None
+    lote_size = 2 # Procesamos de 2 en 2
+    
+    for i in range(0, len(chunks), lote_size):
+        lote = chunks[i : i + lote_size]
+        if vectorstore is None:
+            vectorstore = FAISS.from_documents(lote, embeddings)
+        else:
+            vectorstore.add_documents(lote)
+        time.sleep(3) # Pausa de 3 segundos entre cada lote
+        
     return vectorstore
 
 # Inicializar sistema

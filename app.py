@@ -9,8 +9,7 @@ from langchain_community.vectorstores import FAISS
 st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")
 
 # Configuración directa de Google (Evita el error 404 de LangChain)
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"], transport='rest')
-
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 @st.cache_resource
 def preparar_conocimiento():
     # 1. Cargar PDFs de la carpeta documentos
@@ -75,7 +74,15 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
             """
             
             # C. Llamada DIRECTA a Google Gemini (Saltando el error 404)
-            model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            # Usamos el cliente directamente para saltar el error 404
+            from google.generativeai.types import RequestOptions
+            response = model.generate_content(
+                f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}",
+                request_options=RequestOptions(api_version='v1')
+            )
+
             try:
                 response = model.generate_content(f"{instruccion_maestra}\n\nPregunta: {prompt_usuario}")
                 respuesta_texto = response.text

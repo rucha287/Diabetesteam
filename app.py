@@ -74,7 +74,7 @@ if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
             
             # C. Llamada directa
                 model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash',
+    model = genai.GenerativeModel('gemini-pro'),
     generation_config={"temperature": 0.2}
 )
                 response = model.generate_content(

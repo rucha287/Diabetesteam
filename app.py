@@ -9,7 +9,7 @@ from langchain_community.vectorstores import FAISS
 st.set_page_config(page_title="Tutor Diabetes UCV", page_icon="🩺")
 
 # Configuración directa de Google (Evita el error 404 de LangChain)
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"], transport='rest')
 
 @st.cache_resource
 def preparar_conocimiento():

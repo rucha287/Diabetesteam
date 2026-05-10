@@ -19,7 +19,7 @@ def preparar_conocimiento():
     docs = loader.load()
     
     # 2. Dividir texto
-    splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=500)
     chunks = splitter.split_documents(docs)
     
     # 3. Embeddings (Usando el que ya te funcionó)

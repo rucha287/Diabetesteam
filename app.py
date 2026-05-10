@@ -16,20 +16,19 @@ def configurar_asistente():
     loader = PyPDFDirectoryLoader("documentos/")
     docs = loader.load()
     
-    # 2. Fragmentos más grandes para hacer MENOS peticiones a Google
+    # 2. Fragmentos grandes para minimizar peticiones
     splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=400)
     chunks = splitter.split_documents(docs)
     
-    # 3. Configurar Embeddings (El que te funcionó)
+    # 3. Configurar Embeddings (Ruta oficial simplificada)
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
-        google_api_key=st.secrets["GEMINI_API_KEY"],
-        client_options={"api_version": "v1"}
+        model="models/embedding-001",
+        google_api_key=st.secrets["GEMINI_API_KEY"]
     )
     
-    # 4. Crear base de datos por bloques para no agotar la cuota
+    # 4. Creación por bloques con pausa para evitar el error 429 (Cuota)
     vectorstore = None
-    batch_size = 3  # Procesamos de 3 en 3
+    batch_size = 3 
     
     for i in range(0, len(chunks), batch_size):
         batch = chunks[i : i + batch_size]
@@ -37,30 +36,30 @@ def configurar_asistente():
             vectorstore = FAISS.from_documents(batch, embeddings)
         else:
             vectorstore.add_documents(batch)
-        time.sleep(2) # Pausa obligatoria de 2 segundos para evitar el error 429
+        time.sleep(2) # Pausa de seguridad
     
-    # 5. Configurar Modelo de Chat
+    # 5. Configurar Modelo de Chat (Ruta oficial simplificada)
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="models/gemini-1.5-flash",
         temperature=0.2,
-        google_api_key=st.secrets["GEMINI_API_KEY"],
-        client_options={"api_version": "v1"}
+        google_api_key=st.secrets["GEMINI_API_KEY"]
     )
     
     # 6. Prompt Académico UCV
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "Eres profesor de la UCV. Responde basándote en el contexto: {context}"),
+        ("system", "Eres profesor del diplomado de diabetes de la UCV. Responde basándote en el contexto: {context}"),
         ("human", "{input}"),
     ])
     
     combine_docs_chain = create_stuff_documents_chain(llm, prompt)
     return create_retrieval_chain(vectorstore.as_retriever(), combine_docs_chain)
 
+# Ejecución
 try:
     asistente_ucv = configurar_asistente()
 except Exception as e:
     st.error(f"Error técnico: {e}")
-    if st.button("Reintentar"):
+    if st.button("Limpiar caché y reintentar"):
         st.cache_resource.clear()
         st.rerun()
     st.stop()
@@ -74,7 +73,7 @@ for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
-if prompt_usuario := st.chat_input("Escribe tu pregunta..."):
+if prompt_usuario := st.chat_input("Escribe tu pregunta académica..."):
     st.session_state.messages.append({"role": "user", "content": prompt_usuario})
     with st.chat_message("user"):
         st.markdown(prompt_usuario)

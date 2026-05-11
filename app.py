@@ -51,8 +51,8 @@ except Exception as e:
     st.stop()
 
 # --- INTERFAZ DE USUARIO ---
-st.title("🩺 Tutor Inteligente de Diabetes (UCV)")
-st.caption("Marco Teórico: Bandura, Carga Cognitiva y Alfabetización en Salud")
+st.title("🩺 Asistente para educadores en Diabetes (UCV)")
+st.caption("Soy tu asistente para planificar actividades educativas. Puedes preguntarme cómo planificar actividades educativas sobre los Aspectos clave del automanejo de su condición de personas con diabetes tipo 1.")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

@@ -52,7 +52,7 @@ except Exception as e:
 
 # --- INTERFAZ DE USUARIO ---
 st.title("🩺 Asistente para educadores en Diabetes (UCV)")
-st.caption("Soy tu asistente para planificar actividades educativas. Puedes preguntarme cómo planificar actividades educativas sobre los Aspectos clave del automanejo de su condición de personas con diabetes tipo 1.")
+st.caption("Soy tu asistente para planificar actividades educativas. Puedes preguntarme cómo planificar actividades educativas sobre los aspectos clave del automanejo de su condición de personas con diabetes tipo 1.")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -63,7 +63,7 @@ for m in st.session_state.messages:
         st.markdown(m["content"])
 
 # Entrada del usuario
-if prompt_usuario := st.chat_input("Escribe tu duda académica..."):
+if prompt_usuario := st.chat_input("Escribe tu consulta..."):
     st.session_state.messages.append({"role": "user", "content": prompt_usuario})
     with st.chat_message("user"):
         st.markdown(prompt_usuario)
